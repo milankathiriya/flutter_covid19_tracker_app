@@ -17,9 +17,21 @@ class _HomePageState extends State<HomePage>
 
   late Future<CovidCase?> getCovidCaseData;
 
+  List<Country> countries = [];
+
+  getCountries() async {
+    CovidCase? covidCase = await getCovidCaseData;
+
+    setState(() {
+      countries = covidCase!.countries;
+    });
+  }
+
   @override
   void initState() {
     getCovidCaseData = CovidAPIHelper.covidAPIHelper.fetchAllData();
+
+    getCountries();
 
     tabController = TabController(length: 2, vsync: this);
     super.initState();
@@ -327,144 +339,211 @@ class _HomePageState extends State<HomePage>
                         CovidCase? covidCase = snapshot.data;
 
                         return (covidCase != null)
-                            ? ListView.builder(
-                                physics: const BouncingScrollPhysics(),
-                                itemCount: covidCase.countries.length,
-                                itemBuilder: (context, i) {
-                                  return Card(
-                                    elevation: 2,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 18, vertical: 12),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "${covidCase.countries[i].country}",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                            ? Column(
+                                children: [
+                                  const SizedBox(height: 12),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: TextField(
+                                        style: TextStyle(color: Colors.white),
+                                        cursorColor: Colors.white,
+                                        onChanged: (val) {
+                                          for (Country country
+                                              in covidCase.countries) {
+                                            if (country.country
+                                                .contains(RegExp(val))) {
+                                              print(country.country);
+
+                                              List<Country> c = [];
+
+                                              c.add(country);
+
+                                              setState(() {
+                                                countries = c;
+
+                                                if (val.isEmpty) {
+                                                  countries =
+                                                      covidCase.countries;
+                                                }
+                                              });
+                                            }
+                                          }
+                                        },
+                                        decoration: const InputDecoration(
+                                          hintText: "Search by country name...",
+                                          hintStyle:
+                                              TextStyle(color: Colors.white54),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: Colors.white,
+                                            ),
                                           ),
-                                          const SizedBox(height: 10),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              // Total confirmed cases
-                                              Column(
-                                                children: [
-                                                  Text(
-                                                    "Confirmed",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleMedium
-                                                        ?.copyWith(
-                                                            color: Colors.grey),
-                                                  ),
-                                                  Text(
-                                                    "${covidCase.countries[i].countryTotalConfirmed}",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleLarge
-                                                        ?.copyWith(
-                                                          color:
-                                                              Colors.lightBlue,
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                              // vertical divider
-                                              Container(
-                                                height: 50,
-                                                width: 2,
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 20),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black12,
-                                                ),
-                                              ),
-                                              // Total recovered cases
-                                              Column(
-                                                children: [
-                                                  Text(
-                                                    "Recovered",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleMedium
-                                                        ?.copyWith(
-                                                            color: Colors.grey),
-                                                  ),
-                                                  Text(
-                                                    "${covidCase.countries[i].countryTotalRecovered}",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleLarge
-                                                        ?.copyWith(
-                                                          color:
-                                                              Colors.blueAccent,
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                              // vertical divider
-                                              Container(
-                                                height: 50,
-                                                width: 2,
-                                                margin:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 20),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black12,
-                                                ),
-                                              ),
-                                              // Total deaths
-                                              Column(
-                                                children: [
-                                                  Text(
-                                                    "Deaths",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleMedium
-                                                        ?.copyWith(
-                                                            color: Colors.grey),
-                                                  ),
-                                                  Text(
-                                                    "${covidCase.countries[i].countryTotalDeaths}",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleLarge
-                                                        ?.copyWith(
-                                                          color:
-                                                              Colors.redAccent,
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
-                                  );
-                                },
+                                  ),
+                                  Expanded(
+                                    flex: 12,
+                                    child: ListView.builder(
+                                      physics: const BouncingScrollPhysics(),
+                                      itemCount: countries.length,
+                                      itemBuilder: (context, i) {
+                                        return Card(
+                                          elevation: 2,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 18, vertical: 12),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "${countries[i].country}",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleLarge
+                                                      ?.copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    // Total confirmed cases
+                                                    Column(
+                                                      children: [
+                                                        Text(
+                                                          "Confirmed",
+                                                          style: Theme.of(
+                                                                  context)
+                                                              .textTheme
+                                                              .titleMedium
+                                                              ?.copyWith(
+                                                                  color: Colors
+                                                                      .grey),
+                                                        ),
+                                                        Text(
+                                                          "${countries[i].countryTotalConfirmed}",
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleLarge
+                                                                  ?.copyWith(
+                                                                    color: Colors
+                                                                        .lightBlue,
+                                                                    fontSize:
+                                                                        20,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    // vertical divider
+                                                    Container(
+                                                      height: 50,
+                                                      width: 2,
+                                                      margin: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 20),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.black12,
+                                                      ),
+                                                    ),
+                                                    // Total recovered cases
+                                                    Column(
+                                                      children: [
+                                                        Text(
+                                                          "Recovered",
+                                                          style: Theme.of(
+                                                                  context)
+                                                              .textTheme
+                                                              .titleMedium
+                                                              ?.copyWith(
+                                                                  color: Colors
+                                                                      .grey),
+                                                        ),
+                                                        Text(
+                                                          "${countries[i].countryTotalRecovered}",
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleLarge
+                                                                  ?.copyWith(
+                                                                    color: Colors
+                                                                        .blueAccent,
+                                                                    fontSize:
+                                                                        20,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    // vertical divider
+                                                    Container(
+                                                      height: 50,
+                                                      width: 2,
+                                                      margin: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 20),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.black12,
+                                                      ),
+                                                    ),
+                                                    // Total deaths
+                                                    Column(
+                                                      children: [
+                                                        Text(
+                                                          "Deaths",
+                                                          style: Theme.of(
+                                                                  context)
+                                                              .textTheme
+                                                              .titleMedium
+                                                              ?.copyWith(
+                                                                  color: Colors
+                                                                      .grey),
+                                                        ),
+                                                        Text(
+                                                          "${countries[i].countryTotalDeaths}",
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .titleLarge
+                                                                  ?.copyWith(
+                                                                    color: Colors
+                                                                        .redAccent,
+                                                                    fontSize:
+                                                                        20,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500,
+                                                                  ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
                               )
                             : const Center(
                                 child: Text("No data found..."),
