@@ -25,9 +25,11 @@ class CovidCase {
       globalTotalDeaths: data['Global']['TotalDeaths'],
       globalNewRecovered: data['Global']['NewRecovered'],
       globalTotalRecovered: data['Global']['TotalRecovered'],
-      countries: data['Countries']
-          .map<Country>((e) => Country.fromMap(data: e))
-          .toList(),
+      countries: (data['Countries'] != null)
+          ? data['Countries']
+              .map<Country>((e) => Country.fromMap(data: e))
+              .toList()
+          : [],
     );
   }
 }
